@@ -1,0 +1,6 @@
+---
+- name: Configure exports and permissions
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_export_role
