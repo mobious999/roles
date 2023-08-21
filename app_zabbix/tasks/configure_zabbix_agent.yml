@@ -1,0 +1,15 @@
+---
+- name: Configure Zabbix Agent
+  ansible.builtin.copy:
+    src: zabbix_agentd.conf.j2
+    dest: /etc/zabbix/zabbix_agentd.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Zabbix Agent
+
+- name: Start and enable Zabbix Agent service
+  ansible.builtin.service:
+    name: zabbix-agent
+    state: started
+    enabled: yes

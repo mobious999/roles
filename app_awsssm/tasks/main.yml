@@ -1,2 +1,26 @@
 ---
-# tasks file for app_awsssm
+- name: Download SSM Agent installer
+  ansible.builtin.get_url:
+    url: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+    dest: /tmp/amazon-ssm-agent.rpm
+
+- name: Install SSM Agent
+  ansible.builtin.yum:
+    name: /tmp/amazon-ssm-agent.rpm
+    state: present
+
+- name: Configure SSM Agent
+  ansible.builtin.template:
+    src: ssm_agent_config.json.j2
+    dest: /etc/amazon/ssm/amazon-ssm-agent.json
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Start SSM Agent
+
+- name: Start SSM Agent
+  ansible.builtin.service:
+    name: amazon-ssm-agent
+    state: started
+    enabled: yes
+

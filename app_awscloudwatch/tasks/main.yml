@@ -1,2 +1,34 @@
 ---
-# tasks file for app_awscloudwatch
+- name: Download CloudWatch Agent installer
+  ansible.builtin.get_url:
+    url: "https://s3.amazonaws.com/amazoncloudwatch-agent/{{ ansible_distribution | lower }}/{{ ansible_distribution_major_version }}/amd64/latest/amazon-cloudwatch-agent.rpm"
+    dest: /tmp/amazon-cloudwatch-agent.rpm
+  when: ansible_os_family == 'RedHat'
+
+- name: Install CloudWatch Agent on RedHat
+  ansible.builtin.yum:
+    name: /tmp/amazon-cloudwatch-agent.rpm
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Fetch CloudWatch Agent configuration from AWS Parameter Store
+  aws_ssm_parameter_store_facts:
+    region: "{{ aws_region }}"
+    names: ["el-rhel-8"]
+  register: agent_config
+
+- name: Configure CloudWatch Agent
+  ansible.builtin.copy:
+    content: "{{ agent_config.parameters['el-rhel-8'].value }}"
+    dest: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart CloudWatch Agent
+
+- name: Start and enable CloudWatch Agent service
+  ansible.builtin.service:
+    name: amazon-cloudwatch-agent
+    state: started
+    enabled: yes
+
