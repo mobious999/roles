@@ -1,0 +1,6 @@
+---
+- name: Install lsof
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_lsof_install_role

@@ -1,0 +1,6 @@
+---
+- name: Configure Static Swap File
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_static_swap_role

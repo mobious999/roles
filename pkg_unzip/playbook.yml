@@ -1,0 +1,6 @@
+---
+- name: Install unzip
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_unzip_install_role

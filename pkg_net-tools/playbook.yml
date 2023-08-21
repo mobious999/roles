@@ -1,0 +1,6 @@
+---
+- name: Install net-tools
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_net_tools_install_role

@@ -1,0 +1,6 @@
+---
+- name: Install wget
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_wget_install_role

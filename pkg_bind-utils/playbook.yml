@@ -1,0 +1,6 @@
+---
+- name: Install bind-utils
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_bind_utils_install_role
