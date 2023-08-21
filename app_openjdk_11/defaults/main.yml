@@ -1,2 +1,5 @@
 ---
-# defaults file for app_openjdk_11
+openjdk_version: "11"
+openjdk_package: "java-{{ openjdk_version }}-openjdk"
+java_home_path: "/usr/lib/jvm/java-{{ openjdk_version }}-openjdk"
+os_distribution: "{{ ansible_distribution }}"

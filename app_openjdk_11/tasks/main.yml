@@ -1,2 +1,2 @@
 ---
-# tasks file for app_openjdk_11
+- include_tasks: install_java.yml

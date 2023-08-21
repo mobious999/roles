@@ -1,0 +1,40 @@
+---
+- name: Install OpenJDK on Ubuntu
+  ansible.builtin.package:
+    name: "{{ openjdk_package }}"
+    state: present
+  when: os_distribution == 'Ubuntu'
+
+- name: Install OpenJDK on CentOS/RHEL
+  ansible.builtin.package:
+    name: "{{ openjdk_package }}"
+    state: present
+    disable_gpg_check: yes
+  when: os_distribution == 'CentOS' or os_distribution == 'RedHat'
+
+# Add similar tasks for other OS distributions
+
+- name: Set JAVA_HOME and add to PATH
+  ansible.builtin.lineinfile:
+    path: /etc/profile.d/java.sh
+    line: "export JAVA_HOME={{ java_home_path }}"
+    state: present
+
+- name: Add JAVA_HOME to PATH for all users
+  ansible.builtin.lineinfile:
+    path: /etc/profile.d/java.sh
+    line: "export PATH=$JAVA_HOME/bin:$PATH"
+    insertafter: "export JAVA_HOME={{ java_home_path }}"
+    state: present
+
+- name: Lock the OpenJDK package version on Ubuntu
+  ansible.builtin.apt:
+    name: "{{ openjdk_package }}"
+    state: held
+  when: os_distribution == 'Ubuntu'
+
+- name: Lock the OpenJDK package version on CentOS/RHEL
+  ansible.builtin.shell: |
+    echo "exclude={{ openjdk_package }}" >> /etc/yum.conf
+  when: os_distribution == 'CentOS' or os_distribution == 'RedHat'
+

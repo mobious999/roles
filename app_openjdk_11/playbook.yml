@@ -1,0 +1,6 @@
+---
+- name: Install and Configure Java
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_install_java_role
