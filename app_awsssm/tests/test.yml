@@ -1,4 +1,5 @@
 ---
+- name: playbook for installing aws ssm agent
 - hosts: localhost
   remote_user: root
   roles:

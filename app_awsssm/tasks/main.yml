@@ -3,6 +3,7 @@
   ansible.builtin.get_url:
     url: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
     dest: /tmp/amazon-ssm-agent.rpm
+    mode: '0644'
 
 - name: Install SSM Agent
   ansible.builtin.yum:
@@ -22,5 +23,4 @@
   ansible.builtin.service:
     name: amazon-ssm-agent
     state: started
-    enabled: yes
-
+    enabled: true
