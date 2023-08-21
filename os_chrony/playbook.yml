@@ -1,0 +1,6 @@
+---
+- name: Install and Configure Chrony with AWS Time Servers
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_chrony_aws_install_config_role

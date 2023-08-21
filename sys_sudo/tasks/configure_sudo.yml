@@ -1,0 +1,16 @@
+---
+- name: Create sudoers.d directory
+  ansible.builtin.file:
+    path: "/etc/sudoers.d"
+    state: directory
+    mode: '0755'
+
+- name: Configure sudoers file for {{ username }}
+  ansible.builtin.template:
+    src: user_sudoers.j2
+    dest: "/etc/sudoers.d/item.{{ username }}"
+    owner: root
+    group: root
+    mode: '0440'
+  vars:
+    username: "{{ username }}"

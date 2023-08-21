@@ -1,2 +1,3 @@
 ---
-# tasks file for sys_sudo
+- include_tasks: configure_sudo.yml
+

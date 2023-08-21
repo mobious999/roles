@@ -1,2 +1,3 @@
 ---
-# tasks file for sys_user
+- include_tasks: create_user.yml
+

@@ -1,2 +1,30 @@
 ---
-# defaults file for sys_user
+username: your_username_here
+uid: your_uid_here
+password: your_password_here
+user_state: "present"
+user_append: "yes"
+user_comment: "Ansible User"
+user_createhome: "yes"
+user_expires: ""
+user_force: "no"
+user_group: ""
+user_groups: []
+user_home: ""
+user_login_class: ""
+user_move_home: "yes"
+user_non_unique: "no"
+user_password_lock: "no"
+user_password_max_days: ""
+user_password_min_days: ""
+user_password_warn_days: ""
+user_remove: "no"
+user_shell: "/bin/bash"
+user_skeleton: ""
+user_ssh_key_bits: ""
+user_ssh_key_comment: ""
+user_ssh_key_file: ""
+user_ssh_key_passphrase: ""
+user_ssh_key_type: ""
+os_distribution: "{{ ansible_distribution }}"
+

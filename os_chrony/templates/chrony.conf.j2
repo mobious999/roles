@@ -1,0 +1,11 @@
+# Example chrony configuration
+
+server 169.254.169.123 iburst prefer
+server time.amazon.com iburst
+
+driftfile /var/lib/chrony/drift
+
+# Allow NTP client access from local network
+allow {{ ntp_client_network }}
+
+# Other configuration options...

@@ -1,0 +1,6 @@
+---
+- name: Configure Sudo Access for User
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_multi_os_user_sudo_config_role

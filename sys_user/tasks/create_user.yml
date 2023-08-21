@@ -1,0 +1,33 @@
+---
+- name: Create user on Ubuntu
+  ansible.builtin.user:
+    name: "{{ username }}"
+    uid: "{{ uid }}"
+    password: "{{ password | password_hash('sha512') }}"
+    state: "{{ user_state }}"
+    append: "{{ user_append }}"
+    comment: "{{ user_comment }}"
+    createhome: "{{ user_createhome }}"
+    expires: "{{ user_expires }}"
+    force: "{{ user_force }}"
+    group: "{{ user_group }}"
+    groups: "{{ user_groups }}"
+    home: "{{ user_home }}"
+    login_class: "{{ user_login_class }}"
+    move_home: "{{ user_move_home }}"
+    non_unique: "{{ user_non_unique }}"
+    password_lock: "{{ user_password_lock }}"
+    password_max_days: "{{ user_password_max_days }}"
+    password_min_days: "{{ user_password_min_days }}"
+    password_warn_days: "{{ user_password_warn_days }}"
+    remove: "{{ user_remove }}"
+    shell: "{{ user_shell }}"
+    skeleton: "{{ user_skeleton }}"
+    ssh_key_bits: "{{ user_ssh_key_bits }}"
+    ssh_key_comment: "{{ user_ssh_key_comment }}"
+    ssh_key_file: "{{ user_ssh_key_file }}"
+    ssh_key_passphrase: "{{ user_ssh_key_passphrase }}"
+    ssh_key_type: "{{ user_ssh_key_type }}"
+  when: os_distribution == 'Ubuntu'
+  
+# Add similar tasks for other OS distributions

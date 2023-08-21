@@ -1,0 +1,6 @@
+---
+- name: Create User
+  hosts: your_target_hosts
+  become: yes
+  roles:
+    - my_create_user_role
