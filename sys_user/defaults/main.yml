@@ -27,4 +27,3 @@ user_ssh_key_file: ""
 user_ssh_key_passphrase: ""
 user_ssh_key_type: ""
 os_distribution: "{{ ansible_distribution }}"
-
