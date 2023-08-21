@@ -1,2 +1,2 @@
 ---
-# tasks file for app_apache_tomcat
+- include_tasks: install_tomcat

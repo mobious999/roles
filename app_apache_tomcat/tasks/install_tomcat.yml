@@ -1,0 +1,32 @@
+---
+- name: Ensure tomcat base directory exists
+  ansible.builtin.file:
+    path: /opt/tomcat
+    state: directory
+
+- name: Copy Tomcat archive to server
+  ansible.builtin.copy:
+    src: path/to/your/apache-tomcat-archive.tar.gz
+    dest: /opt/tomcat/versions/
+    remote_src: yes
+    mode: "0644"
+
+- name: Extract Tomcat archive
+  ansible.builtin.unarchive:
+    src: "/opt/tomcat/versions/apache-tomcat-archive.tar.gz"
+    dest: "/opt/tomcat/versions/"
+    remote_src: yes
+    creates: "/opt/tomcat/versions/apache-tomcat-{{ tomcat_version }}"
+
+- name: Create symbolic link for latest version
+  ansible.builtin.file:
+    src: "/opt/tomcat/versions/apache-tomcat-{{ tomcat_version }}"
+    dest: "/opt/tomcat/latest"
+    state: link
+
+- name: Create Tomcat service file
+  ansible.builtin.template:
+    src: tomcat.service.j2
+    dest: /etc/systemd/system/tomcat.service
+  notify:
+    - Reload systemd
