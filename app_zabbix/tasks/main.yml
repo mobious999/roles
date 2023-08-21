@@ -1,2 +1,14 @@
 ---
-# tasks file for app_zabbix
+- name: Download Zabbix Agent installer
+  ansible.builtin.get_url:
+    url: "https://repo.zabbix.com/zabbix/5.4/rhel/{{ ansible_distribution_major_version }}/{{ ansible_architecture }}/zabbix-agent-5.4.{{ ansible_distribution_major_version }}-1.el{{ ansible_distribution_major_version }}.{{ ansible_architecture }}.rpm"
+    dest: /tmp/zabbix-agent.rpm
+  when: ansible_os_family == 'RedHat'
+
+- name: Install Zabbix Agent on RedHat
+  ansible.builtin.yum:
+    name: /tmp/zabbix-agent.rpm
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- include_tasks: configure_zabbix_agent.yml

@@ -1,0 +1,7 @@
+---
+- name: Install and Configure Amazon CloudWatch Agent
+  hosts: your_target_hosts
+  vars:
+    aws_region: your_aws_region
+  roles:
+    - my_cloudwatch_agent_role

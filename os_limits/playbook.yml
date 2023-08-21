@@ -1,0 +1,5 @@
+---
+- name: Configure OS Limits for User and Tomcat
+  hosts: your_target_hosts
+  roles:
+    - my_limits_config_role
