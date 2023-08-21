@@ -4,4 +4,4 @@
   vars:
     aws_region: your_aws_region
   roles:
-    - my_cloudwatch_agent_role
+    - app_awscloudwatch
