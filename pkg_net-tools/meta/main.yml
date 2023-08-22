@@ -2,6 +2,8 @@ galaxy_info:
   author: Mark Quinn
   description: install net-tools
   company: Wellfleet
+  namespace: my_galaxy_namespace
+  role_name: sys_user
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value

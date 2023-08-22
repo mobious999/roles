@@ -2,6 +2,8 @@ galaxy_info:
   author: Mark Quinn
   description: Create a user with all properties
   company: Wellfleet
+  namespace: my_galaxy_namespace
+  role_name: sys_user
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
@@ -17,7 +19,6 @@ galaxy_info:
   license: license (MIT)
 
   min_ansible_version: 2.1
-
   # If this a Container Enabled role, provide the minimum Ansible Container version.
   # min_ansible_container_version:
 
