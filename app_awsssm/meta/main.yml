@@ -1,6 +1,6 @@
 galaxy_info:
   author: Mark Quinn
-  description: install aws ssm agent
+  description: install and configure crowdstrike agent
   company: Wellfleet
 
   # If the issue tracker for your role is not on github, uncomment the
