@@ -1,19 +1,24 @@
 ---
-- name: Download Amazon CLI v2 installer
-  ansible.builtin.get_url:
-    url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
-    dest: /tmp/awscliv2.zip
-    mode: '644'
+- name: Install package dependencies.
+  package: name={{ item }} state=present
+  with_items:
+    - python
+    - unzip
 
-- name: Unzip Amazon CLI v2 installer
-  ansible.builtin.unarchive:
-    src: /tmp/awscliv2.zip
-    dest: /tmp/awscliv2
+- name: Download the awscli bundle.
+  get_url: url=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+  register: aws_cli_download_bundle
 
-- name: Install Amazon CLI v2
-  ansible.builtin.command: /tmp/awscliv2/aws/install
+- name: Unarchive the installer.
+  unarchive: src=/tmp/awscli-bundle.zip dest=/tmp copy=no creates=/tmp/awscli-bundle
+  when: aws_cli_download_bundle.changed
+  register: aws_cli_unarchive_installer
+
+- name: Install awscli package.
+  shell: python /tmp/awscli-bundle/install
   args:
-    creates: /usr/local/bin/aws
+    creates: /usr/bin/aws
+  when: aws_cli_unarchive_installer.changed
 
 - name: Create /etc/profile.d/awscli.sh to add awscli to PATH
   ansible.builtin.template:
