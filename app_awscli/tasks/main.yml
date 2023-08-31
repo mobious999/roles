@@ -16,8 +16,6 @@
 
 - name: Install awscli package.
   shell: python /tmp/awscli-bundle/install
-  args:
-    creates: /usr/bin/aws
   when: aws_cli_unarchive_installer.changed
 
 - name: Create /etc/profile.d/awscli.sh to add awscli to PATH
