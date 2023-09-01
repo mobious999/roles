@@ -1,0 +1,106 @@
+---
+- name: API Install Method Block
+  when: falcon_install_method == "api"
+  block:
+    - name: "CrowdStrike Falcon | Validate Required API URL Is Defined"
+      ansible.builtin.fail:
+        msg: "falcon_cloud is not configured! Please configure falcon_cloud and re-run the installation again!"
+      when: not falcon_cloud
+
+    - name: "CrowdStrike Falcon | Validate CrowdStrike API Client ID Is Defined"
+      ansible.builtin.fail:
+        msg: "falcon_client_id is not configured! Please configure falcon_client_id and re-run the installation again!"
+      when: not falcon_client_id
+
+    - name: "CrowdStrike Falcon | Validate CrowdStrike API Client Secret Is Defined"
+      ansible.builtin.fail:
+        msg: "falcon_client_secret is not configured! Please configure falcon_client_secret and re-run the installation again!"
+      when: not falcon_client_secret
+
+    - name: "CrowdStrike Falcon | Validate CrowdStrike Falcon Sensor version decrement is correctly set"
+      ansible.builtin.fail:
+        msg: "falcon_sensor_version_decrement must be an integer between 0 and 5 inclusive!"
+      when: falcon_sensor_version_decrement | int < 0 or falcon_sensor_version_decrement | int > 5
+
+- name: "CrowdStrike Falcon | Configure Python Interpreter for older Linux OSes"
+  ansible.builtin.set_fact:
+    ansible_python_interpreter: /usr/bin/python
+  when:
+    - ansible_facts['distribution'] == "Amazon"
+    - ansible_facts['distribution_major_version'] | int < 2
+
+- name: "CrowdStrike Falcon | Default Operating System configuration"
+  ansible.builtin.set_fact:
+    falcon_target_os: "{{ ansible_facts['distribution'] }}"
+    falcon_os_family: "{{ ansible_facts['system'] | lower }}"
+    falcon_os_version: "*{{ ansible_facts['distribution_major_version'] }}*"
+    falcon_sensor_update_policy_platform: "{{ ansible_facts['system'] }}"
+    falcon_os_vendor: "{{ ansible_facts['os_family'] | lower if (ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution'] != 'Amazon') else ansible_facts['distribution'] | lower }}"
+
+- name: "CrowdStrike Falcon | Determine Operating System Architecture (Linux)"
+  ansible.builtin.set_fact:
+    falcon_os_arch: "{{ falcon_os_arch_dict[ansible_facts['architecture']] }}"
+  when: ansible_facts['system'] == "Linux"
+
+- name: "CrowdStrike Falcon | Determine if Endpoint Operating System Is RHEL, CentOS, or Oracle Linux"
+  ansible.builtin.set_fact:
+    falcon_target_os: "*RHEL*"
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "CrowdStrike Falcon | Determine if Target OS Is Amazon Linux"
+  ansible.builtin.set_fact:
+    falcon_target_os: "Amazon Linux"
+  when: ansible_facts['distribution'] == "Amazon"
+
+- name: CrowdStrike Falcon | Determine if Target OS Is MacOS
+  ansible.builtin.set_fact:
+    falcon_target_os: "macOS"
+    falcon_os_family: "mac"
+    falcon_path: "/Applications/Falcon.app/Contents/Resources/"
+    falcon_os_version: ""
+    falcon_sensor_update_policy_platform: "Mac"
+  when: ansible_facts['distribution'] == "MacOSX"
+
+- name: "CrowdStrike Falcon | Endpoint Operating System Detected Is Microsoft Windows"
+  ansible.builtin.set_fact:
+    falcon_os_version: ""
+    falcon_target_os: "Windows"
+    falcon_sensor_update_policy_platform: "{{ ansible_facts['os_family'] }}"
+  when: ansible_facts['os_family'] == "Windows"
+
+- name: CrowdStrike Falcon | Verify Temporary Install Directory Exists (non-Windows)
+  ansible.builtin.tempfile:
+    path: "{{ falcon_install_tmp_dir }}"
+    state: directory
+    suffix: falcon
+  when:
+    - ansible_facts['system'] == "Linux" or ansible_facts['system'] == "Darwin"
+    - falcon_install_tmp_dir is defined
+  register: falcon_install_temp_directory
+  changed_when: no
+
+- name: CrowdStrike Falcon | Verify Temporary Install Directory Exists (Windows)
+  ansible.windows.win_tempfile:
+    path: "{{ falcon_windows_tmp_dir }}"
+    state: directory
+    suffix: falcon
+  when:
+    - ansible_facts['os_family'] == "Windows"
+    - falcon_windows_tmp_dir is defined
+  register: falcon_install_win_temp_directory
+  changed_when: no
+
+- name: CrowdStrike Falcon | Verify Falcon is not already installed (macOS)
+  ansible.builtin.stat:
+    path: "{{ falcon_path }}"
+  when:
+    - ansible_facts['system'] == "Darwin"
+    - falcon_path is defined
+  register: falcon_already_installed
+
+- name: "CrowdStrike Falcon | Override falcon_sensor_version_decrement when falcon_sensor_update_policy_name or falcon_sensor_version set"
+  ansible.builtin.set_fact:
+    falcon_sensor_version_decrement: 0
+  when:
+    - falcon_sensor_update_policy_name or
+      falcon_sensor_version
