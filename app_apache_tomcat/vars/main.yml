@@ -1,3 +1,2 @@
 ---
-tomcat_version: 9
-tomcat_version_full: 9.0.75
+# vars file for app_apache_tomcat
