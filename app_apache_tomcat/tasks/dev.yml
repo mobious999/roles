@@ -1,0 +1,20 @@
+---
+- name: Ensure tomcat user
+  user:
+    name: tomcat
+    shell: /bin/false
+
+- name: Deploy environment-specific server.xml
+  template:
+    src: server.xml.j2
+    dest: /opt/tomcat/latest/conf/server.xml
+    owner: tomcat
+    group: tomcat
+    mode: '0644'
+
+- name: Reload systemd and start Tomcat
+  systemd:
+    name: tomcat
+    daemon_reload: yes
+    enabled: yes
+    state: started
