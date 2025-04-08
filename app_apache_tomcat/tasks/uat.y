@@ -1,58 +1,58 @@
 ---
 - name: Ensure tomcat user
-  user:
+  ansible.builtin.user:
     name: tomcat
     shell: /bin/false
 
 - name: Create Tomcat install directory
-  file:
+  ansible.builtin.file:
     path: /opt/tomcat
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Copy Tomcat archive
-  copy:
+  ansible.builtin.copy:
     src: apache-tomcat-9.0.85-dev.tar.gz
     dest: /opt/tomcat/apache-tomcat.tar.gz
 
 - name: Extract Tomcat
-  unarchive:
+  ansible.builtin.unarchive:
     src: /opt/tomcat/apache-tomcat.tar.gz
     dest: /opt/tomcat
-    remote_src: yes
+    remote_src: true
     creates: /opt/tomcat/apache-tomcat-9.0.85
 
 - name: Symlink to latest
-  file:
+  ansible.builtin.file:
     src: /opt/tomcat/apache-tomcat-9.0.85
     dest: /opt/tomcat/latest
     state: link
-    force: yes
+    force: true
 
 - name: Copy environment-specific keystore
-  copy:
+  ansible.builtin.copy:
     src: dev-keystore.jks
     dest: /opt/tomcat/latest/conf/keystore.jks
     owner: tomcat
     group: tomcat
-    mode: '0600'
+    mode: "0600"
 
 - name: Deploy environment-specific server.xml
-  template:
+  ansible.builtin.template:
     src: server.xml.j2
     dest: /opt/tomcat/latest/conf/server.xml
     owner: tomcat
     group: tomcat
-    mode: '0644'
+    mode: "0644"
 
 - name: Copy Tomcat systemd unit file
-  template:
+  ansible.builtin.template:
     src: tomcat.service.j2
     dest: /etc/systemd/system/tomcat.service
 
 - name: Reload systemd and start Tomcat
-  systemd:
+  ansible.builtin.systemd:
     name: tomcat
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started

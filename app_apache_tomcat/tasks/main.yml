@@ -1,74 +1,77 @@
 ---
+
 - name: Configure Apache Tomcat by environment
-  hosts: all
-  gather_facts: yes
+  become: true
+  become_user: root
+  gather_facts: true
 
-  tasks:
-
+  block:
     - name: Create group
-      group: 
-        name={{ tomcat_group }} 
-        state=present
-
+      group: name={{ tomcat_group }} state=present
     - name: Create user
-      user: 
-        name={{ tomcat_user }} 
-        shell=/bin/sh 
-        group={{ tomcat_group }} 
-        state=present
+      user: name={{ tomcat_user }} shell=/bin/sh group={{ tomcat_group }} state=present
 
     - name: Create folder
-      file: 
-        path={{ tomcat_user_home }} 
-        state=directory 
-        owner={{ tomcat_user }} 
-        group={{ tomcat_group }} 
-        mode=0755
+      file: path={{ tomcat_user_home }} state=directory owner={{ tomcat_user }} group={{ tomcat_group }} mode=0755
 
     - name: Change ownership of Tomcat installation to the {{ tomcat_user }}
-      file: 
-        path={{ tomcat_user_home }} 
-        state=directory 
-        owner={{ tomcat_user }} 
-        group={{ tomcat_group }}
-        recurse=yes
+      file: path={{ tomcat_user_home }} state=directory owner={{ tomcat_user }} group={{ tomcat_group }} recurse=yes
+
+    - name: Ensure /opt/tomcat exists
+      ansible.builtin.file:
+        path: "{{ tomcat_user_home }}"
+        state: directory
+        owner: "{{ tomcat_user }}"
+        group: "{{ tomcat_group }}"
+        mode: '0755'
+
+    - name: Ensure /opt/tomcat/versions exists
+      ansible.builtin.file:
+        path: "{{ tomcat_user_home }}/versions"
+        state: directory
+        owner: "{{ tomcat_user }}"
+        group: "{{ tomcat_group }}"
+        mode: '0755'
 
     - name: move tomcat archive to /tmp for unpacking
       src: apache-tomcat-{{ tomcat_version }}.tar.gz
-      dest: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+      dest: /tmp
       mode: '0644'
       register: tomcat_copied
 
-    -name: Extract tomcat #{{ tomcat_version }}
-      unarchive:
-        extra_opts: ['--strip-components=1', '--show-stored-names']
-        src: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
-        dest: '{{ tomcat_user_home }}/versions/{{ tomcat_version }}'
-        remote_src: yes
+    - name: Extract Tomcat from the tmp directory
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "{{ tomcat_version_dir }}"
+        remote_src: true
+        extra_opts: ['--strip-components=1']
+        owner: "{{ tomcat_user }}"
+        group: "{{ tomcat_group }}"
+        creates: "{{ tomcat_version_dir }}/bin/startup.sh"
         register: tomcat_extracted
-    when: tomcat_copy is changed
+      when: tomcat_copied is changed
 
     - name: Symlink to latest
-        file:
-          src: /opt/tomcat/versions/{{ tomcat_version }}
-          dest: /opt/tomcat/latest
-          state: link
-          force: yes
-    when: tomcat_extracted is changed
+      file:
+        src: /opt/tomcat/versions/{{ tomcat_version }}
+        dest: /opt/tomcat/latest
+        state: link
+        force: true
+      when: tomcat_extracted is changed
 
     - name: Copy Tomcat systemd unit file
       template:
       src: tomcat.service.j2
       dest: /etc/systemd/system/tomcat.service
       owner: root
-      group: root      
+      group: root
       mode: '0644'
 
     - name: Enable and start the service
       service:
         name: "{{ service_name }}"
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Fail if hostname is not set (for environment determination)
       fail:
@@ -108,7 +111,3 @@
       fail:
       msg: "Environment '{{ environment }}' is not recognized."
       when: environment == 'unknown'
-
-    roles:
-    - app_apache_tomcat
-
