@@ -4,61 +4,89 @@
   gather_facts: yes
 
   tasks:
-  
+
     - name: Create group
-      group: name={{ tomcat_group }} state=present
+      group: 
+        name={{ tomcat_group }} 
+        state=present
 
     - name: Create user
-      user: name={{ tomcat_user }} shell=/bin/sh group={{ tomcat_group }} state=present
+      user: 
+        name={{ tomcat_user }} 
+        shell=/bin/sh 
+        group={{ tomcat_group }} 
+        state=present
 
     - name: Create folder
-      file: path={{ tomcat_user_home }} state=directory owner={{ tomcat_user }} group={{ tomcat_group }} mode=0755
+      file: 
+        path={{ tomcat_user_home }} 
+        state=directory 
+        owner={{ tomcat_user }} 
+        group={{ tomcat_group }} 
+        mode=0755
+
+    - name: Change ownership of Tomcat installation to the {{ tomcat_user }}
+      file: 
+        path={{ tomcat_user_home }} 
+        state=directory 
+        owner={{ tomcat_user }} 
+        group={{ tomcat_group }}
+        recurse=yes
 
     - name: move tomcat archive to /tmp for unpacking
-        src: apache-ant-1.10.13-bin.tar.gz   
-        dest: /tmp/apache-ant.tar.gz
-        mode: '0644'
+      src: apache-tomcat-{{ tomcat_version }}.tar.gz
+      dest: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
+      mode: '0644'
       register: tomcat_copied
 
-    - name: Extract tomcat {{ tomcat_version }}
+    -name: Extract tomcat #{{ tomcat_version }}
       unarchive:
         extra_opts: ['--strip-components=1', '--show-stored-names']
         src: /tmp/apache-tomcat-{{ tomcat_version }}.tar.gz
-        dest: '{{ tomcat_user_home }}/versions/{ tomcat_version }}'
+        dest: '{{ tomcat_user_home }}/versions/{{ tomcat_version }}'
         remote_src: yes
-      register: tomcat_extracted
-      when: tomcat_copy is changed
+        register: tomcat_extracted
+    when: tomcat_copy is changed
 
     - name: Symlink to latest
-      file:
-        src: /opt/tomcat/versions/apache-tomcat-9.0.85
-        dest: /opt/tomcat/latest
-        state: link
-        force: yes
-      when: tomcat_extracted is changed
+        file:
+          src: /opt/tomcat/versions/{{ tomcat_version }}
+          dest: /opt/tomcat/latest
+          state: link
+          force: yes
+    when: tomcat_extracted is changed
 
     - name: Copy Tomcat systemd unit file
       template:
-        src: tomcat.service.j2
-        dest: /etc/systemd/system/tomcat.service
+      src: tomcat.service.j2
+      dest: /etc/systemd/system/tomcat.service
+      owner: root
+      group: root      
+      mode: '0644'
 
-    - name: Fail if hostname is not set
+    - name: Enable and start the service
+      service:
+        name: "{{ service_name }}"
+        state: started
+        enabled: yes
+
+    - name: Fail if hostname is not set (for environment determination)
       fail:
-        msg: "Hostname is not set; cannot determine environment."
+      msg: "Hostname is not set; cannot determine environment."
       when: ansible_hostname is not defined or not ansible_hostname
 
     - name: Set environment based on hostname prefix
       set_fact:
         environment: >-
           {{
-            ['dev', 'qa', 'uat', 'prod']
-            | select('search', '^' ~ ansible_hostname)
-            | list | first | default('unknown')
+          ['dev', 'qa', 'uat', 'prod']
+          | select('search', '^' ~ ansible_hostname)
+          | list | first | default('unknown')
           }}
 
     - name: Debug detected environment
       debug:
-        msg: "Host '{{ ansible_hostname }}' is in the '{{ environment }}' environment."
+      msg: "Host '{{ ansible_hostname }}' is in the '{{ environment }}' environment."
 
     - name: Include dev tasks
       include_tasks: dev.yml
@@ -78,10 +106,9 @@
 
     - name: Fail if environment is unknown
       fail:
-        msg: "Environment '{{ environment }}' is not recognized."
+      msg: "Environment '{{ environment }}' is not recognized."
       when: environment == 'unknown'
 
-  roles:
+    roles:
     - app_apache_tomcat
-
 

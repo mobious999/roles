@@ -7,5 +7,7 @@ tomcat_port_ajp: '8009'
 tomcat_port_https: '8443'
 tomcat_port_shutdown: '8005'
 tomcat_group: 'tomcat'
+tomcat_service_name: 'tomcat'
 tomcat_user: 'tomcat'
 tomcat_user_home: '/opt/tomcat'
+
