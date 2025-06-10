@@ -105,7 +105,7 @@ pyxdg==0.28
 PyYAML==6.0.1
 referencing==0.30.2
 reportlab==4.0.4
-requests==2.32.2
+requests==2.32.4
 requests-kerberos==0.12.0
 requests-ntlm==1.2.0
 resolvelib==1.0.1
